@@ -1,0 +1,13 @@
+{
+  "name": "cloudpix-cyber-range",
+  "version": "1.0.0",
+  "private": true,
+  "description": "云图科技一体化靶场 - 零依赖本地安全训练环境",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=16"
+  }
+}

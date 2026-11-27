@@ -1,0 +1,52 @@
+@echo off
+chcp 936 >nul
+cd /d "%~dp0"
+title CloudPix 靶场
+
+where node >nul 2>nul
+if errorlevel 1 goto NONODE
+
+netstat -ano | findstr ":7788" | findstr "LISTENING" >nul
+if not errorlevel 1 goto OPEN
+
+echo   正在启动靶场服务 ...
+start "CloudPix Range Server" cmd /k "node server.js"
+timeout /t 2 >nul
+
+:OPEN
+set "URL=http://127.0.0.1:7788/"
+set "CHROME=%ProgramFiles%\Google\Chrome\Application\chrome.exe"
+set "CHROME86=%ProgramFiles(x86)%\Google\Chrome\Application\chrome.exe"
+set "EDGE=%ProgramFiles(x86)%\Microsoft\Edge\Application\msedge.exe"
+set "EDGE64=%ProgramFiles%\Microsoft\Edge\Application\msedge.exe"
+
+if exist "%CHROME%" goto APP_CHROME
+if exist "%CHROME86%" goto APP_CHROME86
+if exist "%EDGE%" goto APP_EDGE
+if exist "%EDGE64%" goto APP_EDGE64
+start "" %URL%
+exit /b 0
+
+:APP_CHROME
+start "" "%CHROME%" --app=%URL% --window-size=1500,960
+exit /b 0
+
+:APP_CHROME86
+start "" "%CHROME86%" --app=%URL% --window-size=1500,960
+exit /b 0
+
+:APP_EDGE
+start "" "%EDGE%" --app=%URL% --window-size=1500,960
+exit /b 0
+
+:APP_EDGE64
+start "" "%EDGE64%" --app=%URL% --window-size=1500,960
+exit /b 0
+
+:NONODE
+echo.
+echo   没有检测到 Node.js，请先安装 16 以上版本：https://nodejs.org
+echo   如果你有 dist\靶场.exe，那个版本不需要安装 Node。
+echo.
+pause
+exit /b 1

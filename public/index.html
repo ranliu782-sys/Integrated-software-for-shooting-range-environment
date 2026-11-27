@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>一体化靶场 · 攻击控制台</title>
+<link rel="stylesheet" href="/assets/app.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2322d3ee'/%3E%3Cpath d='M9 21l7-11 7 11' stroke='%230b0e14' stroke-width='2.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-logo">CR</div>
+      <div class="brand-text">
+        <h1>一体化靶场</h1>
+        <p>CloudPix Cyber Range</p>
+      </div>
+    </div>
+
+    <div class="score-panel">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 100 100" class="ring">
+          <circle cx="50" cy="50" r="42" class="ring-track"></circle>
+          <circle cx="50" cy="50" r="42" class="ring-bar" id="ringBar"></circle>
+        </svg>
+        <div class="ring-center"><span id="pct">0%</span></div>
+      </div>
+      <div class="score-meta">
+        <div class="score-num" id="score">0</div>
+        <div class="score-label">总积分</div>
+        <div class="score-sub" id="solvedText">已通关 0 / 0</div>
+      </div>
+    </div>
+
+    <nav class="challenge-nav" id="nav"></nav>
+
+    <div class="sidebar-foot">
+      <span class="pulse"></span>
+      <span>本地沙箱运行中 · 127.0.0.1</span>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="top-left">
+        <span class="badge-soft">SANDBOX</span>
+        <span class="top-title">攻击控制台</span>
+      </div>
+      <div class="top-actions">
+        <label class="actor-field">
+          <span>操作员</span>
+          <input id="actor" type="text" placeholder="输入昵称" maxlength="24" spellcheck="false">
+        </label>
+        <button class="btn" id="btn-net">抓包 / 扫描</button>
+        <button class="btn" id="btn-board">排行榜</button>
+        <button class="btn btn-danger" id="btn-reset">重置靶场</button>
+      </div>
+    </header>
+
+    <section class="stage" id="stage">
+      <div class="loading">正在加载靶场数据…</div>
+    </section>
+  </main>
+</div>
+
+<div class="modal" id="boardModal" hidden>
+  <div class="modal-card">
+    <div class="modal-head">
+      <h2>排行榜</h2>
+      <button class="btn btn-ghost" id="modal-close">关闭</button>
+    </div>
+    <div class="modal-body" id="boardBody"></div>
+  </div>
+</div>
+
+<div class="modal" id="netModal" hidden>
+  <div class="modal-card modal-wide">
+    <div class="modal-head">
+      <h2>抓包与扫描</h2>
+      <button class="btn btn-ghost" id="net-close">关闭</button>
+    </div>
+    <div class="modal-body" id="netBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script src="/assets/console.js"></script>
+</body>
+</html>

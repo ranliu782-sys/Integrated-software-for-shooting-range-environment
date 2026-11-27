@@ -1,0 +1,122 @@
+@echo off
+chcp 936 >nul
+setlocal
+cd /d "%~dp0"
+
+set "EXE=%~dp0靶场.exe"
+set "TASK_USER=CloudPixRange"
+set "TASK_SVC=CloudPixRangeService"
+
+if not exist "%EXE%" goto NOEXE
+
+if /i "%~1"=="install-user" goto INSTALL_USER
+if /i "%~1"=="install-service" goto INSTALL_SVC
+if /i "%~1"=="uninstall" goto UNINSTALL
+if /i "%~1"=="stop" goto STOP
+if /i "%~1"=="status" goto STATUS
+goto MENU
+
+:MENU
+cls
+echo.
+echo   ==========================================================
+echo    CloudPix 靶场 常驻运行管理
+echo   ==========================================================
+echo.
+echo    1  开机自启   当前用户登录后自动运行，不需要管理员
+echo    2  系统服务   开机即运行，未登录也生效，需要管理员
+echo    3  立即停止   结束正在运行的靶场
+echo    4  查看状态
+echo    5  卸载全部自启配置
+echo    0  退出
+echo.
+set /p "CH=  请选择: "
+if "%CH%"=="1" goto INSTALL_USER
+if "%CH%"=="2" goto INSTALL_SVC
+if "%CH%"=="3" goto STOP
+if "%CH%"=="4" goto STATUS
+if "%CH%"=="5" goto UNINSTALL
+if "%CH%"=="0" goto END
+goto MENU
+
+:INSTALL_USER
+echo.
+echo   正在注册开机自启 ...
+schtasks /Create /TN "%TASK_USER%" /TR "\"%EXE%\"" /SC ONLOGON /RL LIMITED /F >nul 2>&1
+if errorlevel 1 goto FAILED
+echo   完成。下次登录 Windows 时靶场会自动启动。
+goto PAUSE_END
+
+:INSTALL_SVC
+echo.
+net session >nul 2>&1
+if errorlevel 1 goto NEEDADMIN
+echo   正在注册系统级开机任务 ...
+schtasks /Create /TN "%TASK_SVC%" /TR "\"%EXE%\"" /SC ONSTART /RU SYSTEM /RL HIGHEST /F >nul 2>&1
+if errorlevel 1 goto FAILED
+echo   完成。开机后靶场会自动监听 7788 / 7789 / 2222。
+echo   注意：系统任务没有窗口，停止请用菜单 3。
+goto PAUSE_END
+
+:STOP
+echo.
+echo   正在停止靶场 ...
+taskkill /IM 靶场.exe /F >nul 2>&1
+if errorlevel 1 goto NOTRUN
+echo   已停止。
+goto PAUSE_END
+
+:NOTRUN
+echo   靶场当前没有在运行。
+goto PAUSE_END
+
+:STATUS
+echo.
+schtasks /Query /TN "%TASK_USER%" >nul 2>&1
+if errorlevel 1 goto ST_USER_OFF
+echo   开机自启: 已注册
+goto ST_SVC
+:ST_USER_OFF
+echo   开机自启: 未注册
+:ST_SVC
+schtasks /Query /TN "%TASK_SVC%" >nul 2>&1
+if errorlevel 1 goto ST_SVC_OFF
+echo   系统服务: 已注册
+goto ST_RUN
+:ST_SVC_OFF
+echo   系统服务: 未注册
+:ST_RUN
+tasklist /FI "IMAGENAME eq 靶场.exe" 2>nul | findstr /I "靶场" >nul
+if errorlevel 1 goto ST_STOPPED
+echo   运行状态: 正在运行
+goto PAUSE_END
+:ST_STOPPED
+echo   运行状态: 已停止
+goto PAUSE_END
+
+:UNINSTALL
+echo.
+echo   正在卸载自启配置 ...
+schtasks /Delete /TN "%TASK_USER%" /F >nul 2>&1
+schtasks /Delete /TN "%TASK_SVC%" /F >nul 2>&1
+echo   已清理。
+goto PAUSE_END
+
+:NEEDADMIN
+echo   需要管理员权限，请右键本文件选择 以管理员身份运行。
+goto PAUSE_END
+
+:FAILED
+echo   操作失败，可能被系统安全策略阻止。
+goto PAUSE_END
+
+:NOEXE
+echo   没有找到 靶场.exe，请把本文件放在 exe 同目录。
+goto PAUSE_END
+
+:PAUSE_END
+if "%NOPAUSE%"=="1" goto END
+echo.
+pause
+:END
+exit /b 0
